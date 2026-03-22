@@ -112,7 +112,10 @@
     <div class="page" id="page-products">
       <div class="sec-hd">
         <div class="sec-title">📦 නිෂ්පාදන <span style="font-size:13px;color:var(--text3)" id="prod-cnt"></span></div>
-        <button class="btn btn-primary" onclick="openProdModal()">&#65291; &#2344;&#2367;&#2358;&#2381;&#2346;&#2366;&#2342;&#2344; &#2318;&#2453;&#2365;&#2385; &#2453;&#2352;&#2344;&#2381;&#2344;</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="reseedProducts()" style="font-size:12px">📥 Sinhala Catalogue (1000+)</button>
+          <button class="btn btn-primary" onclick="openProdModal()">&#65291; &#2344;&#2367;&#2358;&#2381;&#2346;&#2366;&#2342;&#2344; &#2318;&#2453;&#2365;&#2385; &#2453;&#2352;&#2344;&#2381;&#2344;</button>
+        </div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         <input class="fi" id="prod-search-name" placeholder="Search by name..." oninput="renderProds()" style="flex:1;min-width:140px">
