@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MART Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mart-admin.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">◈ MART</div>
+    <div class="login-sub">Admin Control Panel</div>
+    <div class="login-tag">🔐 Admin Access Only</div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" type="password" id="ap" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')aLogin()"></div>
+    <button class="btn btn-primary btn-full" style="padding:11px" onclick="aLogin()">ඇතුල් වන්න →</button>
+    <div style="margin-top:12px;font-size:13px;color:var(--text3)">Default: <span style="color:var(--accent)">admin123</span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div class="layout">
+<aside class="sidebar">
+  <div class="logo-wrap"><div class="logo">◈ MART</div><div class="logo-sub">Admin Panel</div></div>
+  <nav class="nav">
+    <div class="nav-sec">දළ සටහන</div>
+    <div class="ni act" onclick="nav('dash',this)"><span class="ni-ico">📊</span>ප්‍රධාන පිටුව</div>
+    <div class="ni" onclick="nav('pos',this)" style="background:rgba(232,255,71,.06);border:1px solid rgba(232,255,71,.15);margin:2px 4px;border-radius:8px"><span class="ni-ico">🖥</span><strong style="color:var(--accent)">Point of Sale</strong></div>
+    <div class="ni" onclick="nav('branch-order',this)" style="background:rgba(8,145,178,.06);border:1px solid rgba(8,145,178,.15);margin:2px 4px;border-radius:8px"><span class="ni-ico">🏪</span><strong style="color:var(--teal)">Branch Order</strong></div>
+    <div class="ni" onclick="nav('orders',this)"><span class="ni-ico">📋</span>ඇණවුම්<span class="nb" id="ob">0</span></div>
+    <div class="nav-sec">නිෂ්පාදන</div>
+    <div class="ni" onclick="nav('products',this)"><span class="ni-ico">📦</span>නිෂ්පාදන</div>
+    <div class="ni" onclick="nav('offers',this)"><span class="ni-ico">🏷</span>විශේෂ දීමනා</div>
+    <div class="ni" onclick="nav('bulk',this)"><span class="ni-ico">📊</span>ප්‍රමාණ දීමනා</div>
+    <div class="nav-sec">ගාස්තු</div>
+    <div class="ni" onclick="nav('loyalty',this)"><span class="ni-ico">⭐</span>ලොයල්ටි & Tiers</div>
+    <div class="ni" onclick="nav('cash-offers',this)"><span class="ni-ico">💵</span>Cash දීමනා</div>
+    <div class="nav-sec">ගනුදෙනුකරුවන්</div>
+    <div class="ni" onclick="nav('customers',this)"><span class="ni-ico">👥</span>ගනුදෙනුකරුවන්</div>
+    <div class="ni" onclick="nav('routes',this)"><span class="ni-ico">🗺</span>Routes</div>
+    <div class="ni" onclick="nav('complaints',this)"><span class="ni-ico">💬</span>පැමිණිලි<span class="nb" id="cb">0</span></div>
+    <div class="nav-sec">මෙහෙයුම්</div>
+    <div class="ni" onclick="nav('branches',this)"><span class="ni-ico">🏪</span>Branch සුපර්මාකට්</div>
+    <div class="ni" onclick="nav('delivery',this)"><span class="ni-ico">🚚</span>බෙදා හැරීම්</div>
+    <div class="ni" onclick="nav('reminders',this)"><span class="ni-ico">🔔</span>මතක් කිරීම්</div>
+    <div class="ni" onclick="openUpdateModal()" style="margin-top:auto;border-top:1px solid var(--border);margin-top:8px"><span class="ni-ico">🔄</span>App Update <span style="background:var(--teal);color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px">v2.1</span></div>
+  </nav>
+  <div class="sidebar-foot">
+    <div class="admin-chip">
+      <div class="admin-av">A</div>
+      <div style="flex:1;min-width:0"><div class="admin-name">Admin</div><div class="admin-role">ප්‍රධාන පරිශීලක</div></div>
+      <span style="cursor:pointer;color:var(--text3);font-size:13px" onclick="aLogout()" title="ออก">⏏</span>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div><div class="page-title" id="ptitle">ප්‍රධාන පිටුව</div><div class="page-sub" id="psub">ව්‍යාපාර දළ සටහන</div></div>
+    <div class="topbar-right">
+      <div class="notif-btn" onclick="toggleNP()" id="nBtn">🔔<span class="n-dot" id="ndot"></span></div>
+      <button class="btn btn-ghost btn-sm" onclick="aLogout()">⏏ ออก</button>
+    </div>
+  </div>
+
+  <!-- NOTIF PANEL -->
+  <div class="np" id="np">
+    <div class="np-head"><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:13px">🔔 දැනුම්දීම්</span><button class="btn btn-ghost btn-sm" onclick="markAllNR()">සියල්ල කියවා ඇත</button></div>
+    <div class="np-items" id="npItems"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page act" id="page-dash">
+      <div class="stats-grid">
+        <div class="sc y"><div class="sc-ico">💰</div><div class="sc-lbl">සම්පූර්ණ ආදායම</div><div class="sc-val" id="d-rev">රු. 0</div><div class="sc-sub">සියලු ඇණවුම්</div></div>
+        <div class="sc g"><div class="sc-ico">📋</div><div class="sc-lbl">ඇණවුම්</div><div class="sc-val" id="d-ord">0</div><div class="sc-sub">සම්පූර්ණ කළ</div></div>
+        <div class="sc b"><div class="sc-ico">👥</div><div class="sc-lbl">ගනුදෙනුකරුවන්</div><div class="sc-val" id="d-cust">0</div><div class="sc-sub">ලියාපදිංචි</div></div>
+        <div class="sc t"><div class="sc-ico">⭐</div><div class="sc-lbl">ලොයල්ටි Points</div><div class="sc-val" id="d-pts">0</div><div class="sc-sub">ලබා දී ඇත</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div class="sec-hd"><div class="sec-title">මෑත ඇණවුම්</div></div>
+          <div class="tw"><table><thead><tr><th>#</th><th>ගනුදෙනුකරු</th><th>සම්පූර්ණ</th><th>තත්ත්වය</th></tr></thead><tbody id="d-orders"></tbody></table></div>
+        </div>
+        <div>
+          <div class="sec-hd"><div class="sec-title">⭐ ලොයල්ටි සාරාංශය</div></div>
+          <div id="d-loyalty-sum"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRANCH ORDER -->
+    <div class="page" id="page-branch-order" style="padding:0;margin:-20px -22px"></div>
+
+    <!-- ORDERS -->
+    <div class="page" id="page-orders">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+        <select class="fs" id="of" onchange="renderOrders()" style="width:160px"><option value="all">සියලු ඇණවුම්</option><option value="pending">⏳ බලා සිටිනවා</option><option value="confirmed">✓ තහවුරු කළා</option><option value="delivered">✅ ලබා දුන්නා</option><option value="cancelled">✗ අවලංගු කළා</option></select>
+        <select class="fs" id="otf" onchange="renderOrders()" style="width:160px"><option value="all">සියලු ගනුදෙනුකරු</option><option value="retail">🛍 Retail</option><option value="wholesale">🏭 Wholesale</option></select>
+        <span style="font-size:13px;color:var(--text3)" id="oc-label"></span>
+      </div>
+      <div id="orders-list"></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="page" id="page-products">
+      <div class="sec-hd">
+        <div class="sec-title">📦 නිෂ්පාදන <span style="font-size:13px;color:var(--text3)" id="prod-cnt"></span></div>
+        <button class="btn btn-primary" onclick="openProdModal()">&#65291; &#2344;&#2367;&#2358;&#2381;&#2346;&#2366;&#2342;&#2344; &#2318;&#2453;&#2365;&#2385; &#2453;&#2352;&#2344;&#2381;&#2344;</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <input class="fi" id="prod-search-name" placeholder="Search by name..." oninput="renderProds()" style="flex:1;min-width:140px">
+        <div style="position:relative;flex:1;min-width:140px">
+          <input class="fi" id="prod-search-barcode" placeholder="Barcode scan/search..." oninput="renderProds()" style="border-color:rgba(8,145,178,.35);width:100%" autocomplete="off">
+          <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--teal);pointer-events:none">scan</span>
+        </div>
+        <select class="fs" id="prod-cat-filter" onchange="renderProds()" style="width:160px">
+          <option value="all">All Categories</option>
+          <option>Grains &amp; Rice</option><option>Dairy</option><option>Beverages</option><option>Snacks</option>
+          <option>Vegetables</option><option>Fruits</option><option>Meat &amp; Fish</option><option>Bakery</option>
+          <option>Household</option><option>Personal Care</option>
+        </select>
+      </div>
+      <div class="tabs" style="margin-bottom:10px">
+        <button class="tab act" id="prod-tab-nonscale" onclick="prodTabSwitch('nonscale',this)">📦 සාමාන්‍ය නිෂ්පාදන</button>
+        <button class="tab" id="prod-tab-scale" onclick="prodTabSwitch('scale',this)">⚖ Scale නිෂ්පාදන (kg/unit)</button>
+      </div>
+      <div class="tw">
+        <div id="prods-col-header-nonscale" class="pr" style="background:var(--bg2);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);grid-template-columns:2fr 1fr 1fr 1fr 1fr 100px"><span>Product</span><span>Barcode</span><span>Market Price</span><span>Retail</span><span>Wholesale</span><span>Actions</span></div>
+        <div id="prods-col-header-scale" class="pr" style="display:none;background:rgba(8,145,178,.06);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 100px"><span>Product</span><span>Barcode</span><span>Unit Price</span><span>Market Price</span><span>Retail</span><span>Wholesale</span><span>Actions</span></div>
+        <div id="prods-list"></div>
+      </div>
+    </div>
+
+    <!-- SPECIAL OFFERS -->
+    <div class="page" id="page-offers">
+      <div class="sec-hd">
+        <div class="sec-title">🏷 විශේෂ දීමනා</div>
+        <button class="btn btn-primary" onclick="openOfferModal()">＋ නව දීමනා</button>
+      </div>
+      <div id="offers-list"></div>
+    </div>
+
+    <!-- BULK OFFERS -->
+    <div class="page" id="page-bulk">
+      <div class="sec-hd">
+        <div class="sec-title">📊 ප්‍රමාණ-ශ්‍රේණි දීමනා</div>
+        <button class="btn btn-primary" onclick="openBulkModal()">＋ නව දීමනා</button>
+      </div>
+      <div class="card" style="margin-bottom:12px;background:rgba(232,255,71,.05);border-color:rgba(232,255,71,.2)">
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          💡 <strong style="color:var(--accent)">ප්‍රමාණ දීමනා</strong> — නිශ්චිත ප්‍රමාණයකට වඩා මිල දී ගන්නා ගනුදෙනුකරුවන්ට ස්වයංක්‍රීයව discount ලැබේ. Retail සහ Wholesale, Bill-to-Bill සහ Cash — සියල්ලටම valid.
+        </div>
+      </div>
+      <div class="tw"><table><thead><tr><th>නිෂ්පාදනය</th><th>අවම ප්‍රමාණය</th><th>වට්ටම %</th><th>කාටද?</th><th>තත්ත්වය</th><th></th></tr></thead><tbody id="bulk-list"></tbody></table></div>
+    </div>
+
+    <!-- LOYALTY -->
+    <div class="page" id="page-loyalty">
+      <div class="sec-hd"><div class="sec-title">⭐ ලොයල්ටි Points පද්ධතිය</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">🛍 Retail ලොයල්ටි සැකසීම</div>
+          <div class="fg"><label class="fl">රු. 100 කට Points ප්‍රමාණය</label><input class="fi" id="lr-earn" type="number" placeholder="5"></div>
+          <div class="fg"><label class="fl">Point 1 ට රු. වටිනාකම</label><input class="fi" id="lr-val" type="number" step="0.01" placeholder="0.50"></div>
+          <div class="fg"><label class="fl">අවම Redeem Points</label><input class="fi" id="lr-min" type="number" placeholder="100"></div>
+          <div class="fg"><label class="fl">උපරිම Redeem % (bill)</label><input class="fi" id="lr-max" type="number" placeholder="20"></div>
+          <button class="btn btn-primary btn-full" onclick="saveLoyalty('retail')">Retail සැකසීම් සුරකින්න</button>
+        </div>
+        <div class="card">
+          <div class="card-title">🏭 Wholesale ලොයල්ටි සැකසීම</div>
+          <div class="fg"><label class="fl">රු. 100 කට Points ප්‍රමාණය</label><input class="fi" id="lw-earn" type="number" placeholder="8"></div>
+          <div class="fg"><label class="fl">Point 1 ට රු. වටිනාකම</label><input class="fi" id="lw-val" type="number" step="0.01" placeholder="0.75"></div>
+          <div class="fg"><label class="fl">අවම Redeem Points</label><input class="fi" id="lw-min" type="number" placeholder="200"></div>
+          <div class="fg"><label class="fl">උපරිම Redeem % (bill)</label><input class="fi" id="lw-max" type="number" placeholder="15"></div>
+          <button class="btn btn-primary btn-full" onclick="saveLoyalty('wholesale')">Wholesale සැකසීම් සුරකින්න</button>
+        </div>
+      </div>
+      <div class="sec-hd"><div class="sec-title">⭐ Loyalty Tiers</div><button class="btn btn-primary btn-sm" onclick="openTierModal()">＋ Tier එකතු කරන්න</button></div>
+      <div id="tiers-list"></div>
+      <div class="sec-hd" style="margin-top:16px"><div class="sec-title">👥 ගනුදෙනුකරු Points ශේෂ</div></div>
+      <div class="tw"><table><thead><tr><th>ගනුදෙනුකරු</th><th>වර්ගය</th><th>Points</th><th>Tier</th><th>රු. වටිනාකම</th><th>සම්පූර්ණ ඉතිරිය</th></tr></thead><tbody id="loyalty-cust-list"></tbody></table></div>
+    </div>
+
+    <!-- CASH OFFERS (Wholesale) -->
+    <div class="page" id="page-cash-offers">
+      <div class="sec-hd"><div class="sec-title">💵 Cash ගෙවීම් දීමනා — Wholesale</div><button class="btn btn-primary" onclick="openCashOfferModal()">＋ Cash දීමනා එකතු කරන්න</button></div>
+      <div class="card" style="margin-bottom:12px;background:rgba(46,213,115,.05);border-color:rgba(46,213,115,.15)">
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          💡 <strong style="color:var(--green)">Cash දීමනා</strong> — Wholesale ගනුදෙනුකරු Cash ගෙවූ විට item-by-item discount ලැබේ. Bill-to-Bill ගෙවීමේදී මෙය ලබා ගත නොහැක.
+        </div>
+      </div>
+      <div class="tw"><table><thead><tr><th>නිෂ්පාදනය</th><th>Cash වට්ටම %</th><th>තත්ත්වය</th><th>ඉතිරිය පෙන්වනවාද?</th><th></th></tr></thead><tbody id="cash-offers-list"></tbody></table></div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div class="page" id="page-customers">
+      <div class="tabs" style="margin-bottom:10px;flex-wrap:wrap">
+        <button class="tab act" onclick="cTab('retail',this)">🛍 Retail</button>
+        <button class="tab" onclick="cTab('wholesale',this)">🏭 Wholesale</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="tab act" id="cs-all" onclick="cSourceTab('all',this)" style="font-size:13px;padding:4px 12px">🌐 All</button>
+          <button class="tab" id="cs-pos" onclick="cSourceTab('pos',this)" style="font-size:13px;padding:4px 12px">🖥 POS</button>
+          <button class="tab" id="cs-app" onclick="cSourceTab('app',this)" style="font-size:13px;padding:4px 12px">📱 App</button>
+          <button class="tab" id="cs-admin" onclick="cSourceTab('admin',this)" style="font-size:13px;padding:4px 12px">🔧 Admin</button>
+        </div>
+        <input class="fi" id="cust-search" placeholder="🔍 Search by name / phone..." oninput="renderCustomers()" style="flex:1;min-width:200px;max-width:300px;padding:7px 11px;font-size:13px">
+        <span style="font-size:13px;color:var(--text3)" id="cust-count"></span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:900px">
+          <thead><tr style="background:var(--bg2)">
+            <th style="padding:9px 12px;text-align:left;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">ගනුදෙනුකරු</th>
+            <th style="padding:9px 12px;text-align:left;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">දුරකථන</th>
+            <th style="padding:9px 12px;text-align:left;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">ප්‍රදේශය</th>
+            <th style="padding:9px 12px;text-align:left;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">🗺 Route</th>
+            <th style="padding:9px 12px;text-align:center;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">ඇණවුම්</th>
+            <th style="padding:9px 12px;text-align:right;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">💵 Cash</th>
+            <th style="padding:9px 12px;text-align:right;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">📄 B2B</th>
+            <th style="padding:9px 12px;text-align:center;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">⭐ Points</th>
+            <th style="padding:9px 12px;text-align:left;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);border-bottom:1px solid var(--border)">Source</th>
+            <th style="padding:9px 12px;border-bottom:1px solid var(--border)"></th>
+          </tr></thead>
+          <tbody id="custs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ROUTES -->
+    <div class="page" id="page-routes">
+      <div class="sec-hd">
+        <div class="sec-title">🗺 Wholesale Routes</div>
+        <button class="btn btn-primary" onclick="openRouteModal()">＋ Route එකතු කරන්න</button>
+      </div>
+      <div class="card" style="margin-bottom:12px;background:rgba(232,255,71,.05);border-color:rgba(232,255,71,.2)">
+        <div style="font-size:13px;color:var(--text2);line-height:1.7">
+          💡 <strong style="color:var(--accent)">Routes</strong> — Wholesale ගනුදෙනුකරුන් ලියාපදිංචි වීමේදී Route select කරයි. Route-ට Delivery දිනයන් (සතියේ ඕනෑම දිනයන්) set කළ හැකිය. Admin ගනුදෙනුකරුගේ Route වෙනස් කළ හැකිය.
+        </div>
+      </div>
+      <div id="routes-list"></div>
+    </div>
+
+    <!-- COMPLAINTS -->
+    <div class="page" id="page-complaints"><div id="comp-list"></div></div>
+
+    <!-- POS -->
+    <div class="page" id="page-pos" style="padding:0;margin:-20px -22px">
+      <!-- POS top stats bar -->
+      <div class="pos-topbar">
+        <div class="pos-stat"><div class="pos-stat-val" id="pos-today-rev">රු. 0</div><div class="pos-stat-lbl">🏢 Central Today</div></div>
+        <div class="pos-stat"><div class="pos-stat-val" id="pos-today-cnt">0</div><div class="pos-stat-lbl">Bills</div></div>
+        <div class="pos-stat"><div class="pos-stat-val" id="pos-cash-drawer">රු. 0</div><div class="pos-stat-lbl">💵 Cash</div></div>
+        <div class="pos-stat"><div class="pos-stat-val" id="pos-card-total">රු. 0</div><div class="pos-stat-lbl">💳 Card</div></div>
+        <div class="pos-stat"><div class="pos-stat-val" id="pos-b2b-total">රු. 0</div><div class="pos-stat-lbl">📄 B2B</div></div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="renderHeldBills();om('pos-held-modal')" id="pos-held-btn">🔒 Held (0)</button>
+          <button class="btn btn-orange btn-sm" onclick="posOpenShift()">📊 Shift Report</button>
+        </div>
+      </div>
+      <div class="pos-wrap">
+        <!-- LEFT: Bill (wide, all info visible) -->
+        <div class="pos-bill-col">
+          <div class="pos-bill-head">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div>
+                <div class="pos-bill-num" id="pos-bill-num">BILL #001</div>
+                <span style="font-size:13px;color:var(--text3)" id="pos-bill-time"></span>
+              </div>
+              <div style="display:flex;gap:5px">
+                <button class="btn btn-ghost btn-sm" onclick="posHoldBill()">🔒 Hold</button>
+                <button class="btn btn-danger btn-sm" onclick="posVoidBill()">✕ Void</button>
+                <button class="btn btn-ghost btn-sm" onclick="posNewBill()">🔄 New</button>
+              </div>
+            </div>
+            <!-- Compact customer badge — click to open float panel -->
+            <div id="pos-cust-head-badge" onclick="posToggleCustPanel()" style="cursor:pointer;background:var(--bg3);border:1.5px dashed var(--border);border-radius:8px;padding:7px 12px;display:flex;align-items:center;justify-content:space-between;font-size:13px;transition:.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+              <span id="pos-cust-head-label" style="color:var(--text3)">👤 ගනුදෙනුකරු තෝරන්න — ▲ click</span>
+              <span id="pos-cust-head-clear" onclick="event.stopPropagation();posInlineCustClear()" style="display:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px">✕</span>
+            </div>
+          </div>
+
+          <!-- Bill items (scrollable) -->
+          <div class="pos-items" id="pos-items">
+            <div style="text-align:center;padding:30px 20px;color:var(--text3);font-size:15px"><div style="font-size:36px;margin-bottom:8px;opacity:.2">🛒</div>Bill හිස්ය — දකුණු පැත්තේ product click කරන්න</div>
+          </div>
+
+          <!-- Bill footer (always visible) -->
+          <div class="pos-foot">
+            <!-- Discount + Summary 2-column layout -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+              <div>
+                <div class="pos-sum-row"><span style="color:var(--text3)">විකිණීමේ මිල</span><span id="pos-wik-sub">රු. 0.00</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(21,128,61,.12);border:1.5px solid rgba(21,128,61,.4);border-radius:6px;padding:4px 7px;margin:2px 0"><span style="color:var(--green);font-weight:700;font-size:13px">🟢 අත ඉතිරි</span><span id="pos-hand-save" style="color:var(--green);font-weight:800;font-family:'Syne',sans-serif;font-size:13px">රු. 0.00</span></div>
+                <div class="pos-sum-row"><span style="color:var(--accent);font-weight:600">⭐ අපේ මිල</span><span id="pos-sub" style="color:var(--accent);font-weight:600">රු. 0.00</span></div>
+                <div class="pos-sum-row" id="pos-disc-row-d" style="display:none"><span style="color:var(--orange)">💸 Discount</span><span id="pos-disc-amt" style="color:var(--orange)"></span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:4px">
+                <div class="pos-disc-row" style="margin:0">
+                  <div class="pos-disc-type">
+                    <span id="disc-pct-btn" class="act" onclick="posSetDiscType('pct')">%</span>
+                    <span id="disc-lkr-btn" onclick="posSetDiscType('lkr')">රු.</span>
+                  </div>
+                  <input class="pos-disc-inp" id="pos-disc-val" type="number" min="0" placeholder="Discount" oninput="posUpdateBill()">
+                </div>
+              </div>
+            </div>
+
+            <div class="pos-total-row"><span>සම්පූර්ණ ගෙවිය යුතු</span><span id="pos-total">රු. 0.00</span></div>
+
+            <!-- Payment buttons: Cash | Card | B2B (B2B full-width when wholesale) -->
+            <div class="pos-pay-btns" id="pos-pay-btns-wrap" style="grid-template-columns:1fr 1fr;margin-bottom:5px">
+              <div class="pos-pay-btn sel-cash" id="pos-pay-cash" onclick="posSetPay('cash')">💵 Cash</div>
+              <div class="pos-pay-btn" id="pos-pay-card" onclick="posSetPay('card')">💳 Card</div>
+              <div class="pos-pay-btn" id="pos-pay-b2b" onclick="posSetPay('bill_to_bill')" style="display:none;grid-column:1/-1;font-size:13px;padding:9px">📄 Bill-to-Bill ගෙවීම</div>
+            </div>
+
+            <!-- B2B credit breakdown panel -->
+            <div id="pos-b2b-credit-panel" style="display:none;background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.25);border-radius:8px;padding:10px 14px;margin-bottom:5px">
+              <div style="font-size:13px;color:var(--purple);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:8px">📋 Bill-to-Bill ගෙවීම් විස්තර</div>
+              <div style="display:grid;grid-template-columns:1fr auto;gap:3px 12px;font-size:13px">
+                <span style="color:var(--text2)">දැනට ඇති B2B ශේෂය</span>
+                <span id="pos-credit-existing" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--red);text-align:right">රු. 0.00</span>
+                <span style="color:var(--text2)">මෙම bill</span>
+                <span id="pos-credit-this" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--orange);text-align:right">රු. 0.00</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(124,58,237,.2);margin-top:6px;padding-top:6px">
+                <span style="font-size:13px;font-weight:700">නව සම්පූර්ණ ශේෂය</span>
+                <span id="pos-credit-total" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--red)">රු. 0.00</span>
+              </div>
+              <!-- Partial payment option -->
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(124,58,237,.15)">
+                <div style="font-size:13px;color:var(--text3);margin-bottom:6px">🔄 දැන් කොටසක් ගෙවීමට (Partial Payment) — optional</div>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input id="pos-partial-pay" class="pos-cash-inp" type="number" min="0" placeholder="දැන් ගෙවන මුදල (රු.)..." oninput="posUpdateB2BCreditPanel()" style="flex:1;font-size:13px">
+                  <button onclick="document.getElementById('pos-partial-pay').value='';posUpdateB2BCreditPanel()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text3);cursor:pointer;font-size:13px">Clear</button>
+                </div>
+                <div id="pos-partial-result" style="margin-top:5px;font-size:13px;color:var(--teal)"></div>
+              </div>
+            </div>
+
+            <!-- Cash / Card input row -->
+            <div id="pos-cash-row" style="display:flex;flex-direction:column;gap:4px;margin-bottom:5px">
+              <div class="pos-cash-row" style="margin:0">
+                <input class="pos-cash-inp" id="pos-cash-given" type="number" placeholder="ගෙවූ මුදල (රු.)..." oninput="posCalcChange()" min="0">
+                <div class="pos-change" id="pos-change-disp">ඉතිරි: —</div>
+              </div>
+              <div id="pos-cash-summary" style="display:none;background:rgba(21,128,61,.07);border:1px solid rgba(21,128,61,.2);border-radius:7px;padding:7px 12px;font-size:13px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:var(--text3)">ගෙවූ මුදල</span><span id="pos-gewu" style="color:var(--text);font-weight:600">රු. 0.00</span></div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(21,128,61,.2);padding-top:4px;margin-top:2px"><span style="color:var(--green);font-weight:700">ඉතිරි මුදල</span><span id="pos-ithiri" style="color:var(--green);font-weight:800;font-family:'Syne',sans-serif;font-size:13px">රු. 0.00</span></div>
+              </div>
+            </div>
+
+            <button class="btn-pos-complete" id="pos-complete-btn" onclick="posCompleteSale()" disabled>✓ සම්පූර්ණ කරන්න — COMPLETE</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Products (narrower scrollable catalog) -->
+        <div class="pos-prod-col">
+          <div style="display:flex;gap:6px;padding:7px 8px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0">
+            <input class="pos-search" id="pos-search" placeholder="🔍 Search..." oninput="posSearch(this.value)" autocomplete="off" style="flex:1;min-width:0">
+            <div style="position:relative;flex:1">
+              <input class="pos-search" id="pos-barcode-inp" placeholder="🔲 Barcode..." autocomplete="off" style="border-color:rgba(8,145,178,.4);width:100%;min-width:0" onkeydown="if(event.key==='Enter')posBarcodeScan(this.value)">
+              <span style="position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--teal);pointer-events:none">⏎</span>
+            </div>
+          </div>
+          <div class="pos-cats" id="pos-cats"></div>
+          <div class="pos-grid" id="pos-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY -->
+    <div class="page" id="page-delivery">
+      <div class="sec-hd"><div class="sec-title">🚚 බෙදා හැරීම් කලාප</div><button class="btn btn-primary" onclick="openZoneModal()">＋ කලාපය එකතු කරන්න</button></div>
+      <div id="zones-list"></div>
+    </div>
+
+    <!-- REMINDERS -->
+    <div class="page" id="page-reminders">
+      <div class="sec-hd"><div class="sec-title">🔔 නිත්‍ය මතක් කිරීම්</div><button class="btn btn-primary" onclick="openRemModal()">＋ එකතු කරන්න</button></div>
+      <div id="rems-list"></div>
+    </div>
+
+    <!-- BRANCHES -->
+    <div class="page" id="page-branches">
+      <div class="sec-hd">
+        <div class="sec-title">🏪 Branch Supermarkets</div>
+        <button class="btn btn-primary" onclick="openBranchModal()">＋ Branch එකතු කරන්න</button>
+      </div>
+      <!-- Branch sub-tabs -->
+      <div class="tabs" id="branch-tabs" style="margin-bottom:14px;flex-wrap:wrap">
+        <button class="tab act" id="br-tab-overview" onclick="brTab('overview',this)">📊 Overview</button>
+        <button class="tab" id="br-tab-stock" onclick="brTab('stock',this)">📦 Stock</button>
+        <button class="tab" id="br-tab-sales" onclick="brTab('sales',this)">💰 Sales</button>
+        <button class="tab" id="br-tab-orders" onclick="brTab('orders',this)">📋 Orders</button>
+        <button class="tab" id="br-tab-customers" onclick="brTab('customers',this)">👥 Customers</button>
+        <button class="tab" id="br-tab-b2b" onclick="brTab('b2b',this)">📄 B2B Balance</button>
+        <button class="tab" id="br-tab-usage" onclick="brTab('usage',this)">📉 Daily Stock Usage</button>
+      </div>
+      <div id="branch-content"></div>
+    </div>
+
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══════ MODALS ══════ -->
+
+<!-- CUSTOMER HISTORY MODAL (Admin) -->
+<div class="mo" id="cust-hist-modal">
+  <div class="modal" style="max-width:560px;max-height:88vh">
+    <div class="mh"><div class="mt" id="cust-hist-title">📋 Customer History</div><button class="mc" onclick="cm('cust-hist-modal')">✕</button></div>
+    <div class="mb" style="overflow-y:auto;max-height:70vh"><div id="cust-hist-body"></div></div>
+  </div>
+</div>
+
+<!-- BRANCH B2B DEDUCT MODAL -->
+<div class="mo" id="branch-b2b-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="mh"><div class="mt">📄 Branch B2B ශේෂය අඩු කරන්න</div><button class="mc" onclick="cm('branch-b2b-modal')">✕</button></div>
+    <div class="mb">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px" id="bb2b-branch-name"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:8px;padding:12px 14px;margin-bottom:14px">
+        <span style="font-size:13px;color:var(--text2)">දැනට ඇති B2B ශේෂය</span>
+        <span id="bb2b-current" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--red)">රු. 0.00</span>
+      </div>
+      <div class="fg">
+        <label class="fl" style="font-size:13px">ගෙවූ මුදල (රු.)</label>
+        <input class="fi" id="bb2b-amount" type="number" min="0" placeholder="ගෙවූ මුදල ඇතුල් කරන්න..." oninput="bb2bCalc()" style="font-size:13px">
+      </div>
+      <div id="bb2b-preview" style="margin-top:8px;padding:10px 14px;background:var(--bg3);border-radius:8px;font-size:13px;display:none">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:var(--text2)">කලින් ශේෂය</span>
+          <span id="bb2b-prev-val" style="font-weight:700;color:var(--red)"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:var(--text2)">ගෙවූ මුදල</span>
+          <span id="bb2b-pay-val" style="font-weight:700;color:var(--green)"></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);padding-top:6px;margin-top:4px">
+          <span style="font-weight:700">නව ශේෂය</span>
+          <span id="bb2b-new-val" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--accent)"></span>
+        </div>
+      </div>
+      <div class="fa" style="margin-top:16px">
+        <button class="btn btn-ghost" onclick="cm('branch-b2b-modal')">අවලංගු</button>
+        <button class="btn btn-primary" onclick="saveBranchB2BDeduct()" style="font-size:13px">✓ ශේෂය update කරන්න</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BRANCH MODAL -->
+<div class="mo" id="branch-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="mh"><div class="mt" id="bm-title">Branch එකතු කරන්න</div><button class="mc" onclick="cm('branch-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="bm-id">
+      <div class="fr">
+        <div class="fg"><label class="fl">Branch නාමය</label><input class="fi" id="bm-name" placeholder="e.g. Negombo Branch"></div>
+        <div class="fg"><label class="fl">Location</label><input class="fi" id="bm-location" placeholder="e.g. Negombo"></div>
+      </div>
+      <div class="fr">
+        <div class="fg">
+          <label class="fl">🔐 POS PIN (unique)</label>
+          <input class="fi" id="bm-pin" type="password" placeholder="Branch POS PIN">
+          <div style="font-size:13px;color:var(--text3);margin-top:3px">💡 මෙම PIN භාවිතයෙන් POS ලොගින් කළ හැකිය</div>
+        </div>
+        <div class="fg"><label class="fl">Manager නම</label><input class="fi" id="bm-manager" placeholder="Manager name"></div>
+      </div>
+      <div class="fg"><label class="fl">දුරකථන</label><input class="fi" id="bm-phone" placeholder="Branch contact"></div>
+      <div class="fg">
+        <label class="fl">Opening Stock සකසීම</label>
+        <div style="font-size:13px;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;margin-top:4px">
+          💡 Branch create කළ පසු <strong>Stock tab</strong> හරහා ඒ branch-ට item stock assign කරන්න
+        </div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('branch-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveBranch()">Branch සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BRANCH STOCK ADJUST MODAL -->
+<div class="mo" id="br-stock-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="mh"><div class="mt" id="brs-title">Stock Update</div><button class="mc" onclick="cm('br-stock-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="brs-bid">
+      <input type="hidden" id="brs-pid">
+      <div style="font-size:13px;font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px" id="brs-info"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">නව Stock ප්‍රමාණය</label><input class="fi" id="brs-qty" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label class="fl">ක්‍රියාව</label>
+          <select class="fs" id="brs-action">
+            <option value="set">Set (Replace)</option>
+            <option value="add">Add to current</option>
+            <option value="subtract">Subtract from current</option>
+          </select>
+        </div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('br-stock-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveBranchStock()">Stock Update කරන්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BRANCH TRANSFER MODAL (Central → Branch) -->
+<div class="mo" id="br-transfer-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="mh"><div class="mt">📦 Central → Branch Stock Transfer</div><button class="mc" onclick="cm('br-transfer-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="brt-bid">
+      <div class="fg"><label class="fl">Branch</label><select class="fs" id="brt-branch"></select></div>
+      <div class="fg"><label class="fl">නිෂ්පාදනය</label><select class="fs" id="brt-prod"></select></div>
+      <div class="fg">
+        <label class="fl">ප්‍රමාණය (Central → Branch)</label>
+        <input class="fi" id="brt-qty" type="number" min="1" placeholder="0">
+        <div style="font-size:13px;color:var(--text3);margin-top:3px">Central stock අඩු වී Branch stock එකතු වේ</div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('br-transfer-modal')">අවලංගු</button><button class="btn btn-primary" onclick="doTransfer()">Transfer කරන්න</button></div>
+    </div>
+  </div>
+</div>
+<div class="mo" id="prod-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="pm-title">නිෂ්පාදනය</div><button class="mc" onclick="cm('prod-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="pm-id">
+      <div class="fg"><label class="fl">නිෂ්පාදන රූපය</label>
+        <div class="img-zone" id="pm-iz" onclick="document.getElementById('pm-fi').click()">
+          <input type="file" id="pm-fi" accept="image/*" style="display:none" onchange="handleImg(this)">
+          <div id="pm-ip"><div style="font-size:32px;opacity:.3;margin-bottom:6px">📷</div><div style="font-size:13px;color:var(--text2)">රූපය upload කිරීමට click කරන්න</div><div style="font-size:13px;color:var(--text3);margin-top:3px">JPG/PNG/WEBP · max 2MB</div></div>
+          <img id="pm-prev" class="img-prev" alt="">
+          <button type="button" class="img-rm" id="pm-rm" onclick="rmImg(event)">✕</button>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">නිෂ්පාදන නාමය</label><input class="fi" id="pm-name" placeholder="උදා: Basmati Rice 1kg"></div>
+      <div class="fg">
+        <label class="fl">🏷 නිෂ්පාදන වර්ගය</label>
+        <div style="display:flex;gap:8px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--r-sm);flex:1;background:var(--bg2);transition:.15s" id="pm-type-nonscale-lbl">
+            <input type="radio" name="pm-type" id="pm-type-nonscale" value="nonscale" checked onchange="pmTypeChange()" style="accent-color:var(--accent)"> 📦 සාමාන්‍ය නිෂ්පාදනය
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--r-sm);flex:1;background:var(--bg2);transition:.15s" id="pm-type-scale-lbl">
+            <input type="radio" name="pm-type" id="pm-type-scale" value="scale" onchange="pmTypeChange()" style="accent-color:var(--accent)"> ⚖️ Scale නිෂ්පාදනය (kg/unit)
+          </label>
+        </div>
+      </div>
+      <div id="pm-unit-price-row" style="display:none" class="fg">
+        <label class="fl" style="color:var(--teal)">⚖️ ඒකකයේ / kg මිල (රු.) — Unit Price</label>
+        <input class="fi" id="pm-unit-price" type="number" placeholder="0.00" step="0.01" style="border-color:rgba(8,145,178,.3)">
+        <div style="font-size:13px;color:var(--text3);margin-top:3px">💡 POS හිදී quantity ඇතුල් කළ විට ස්වයංක්‍රීයව ගණනය වේ</div>
+      </div>
+      <div class="fg">
+        <label class="fl">🔲 Barcode</label>
+        <div style="display:flex;gap:7px;align-items:center">
+          <input class="fi" id="pm-barcode" placeholder="Barcode ඇතුල් කරන්න හෝ scanner use කරන්න" style="flex:1">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('pm-barcode').focus()" title="Focus barcode field for scanner">📷 Scan</button>
+        </div>
+        <div style="font-size:13px;color:var(--text3);margin-top:3px">💡 Barcode scanner use කළ හැකිය — field focus කර scan කරන්න</div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">ප්‍රවර්ගය</label><select class="fs" id="pm-cat"><option>Grains &amp; Rice</option><option>Dairy</option><option>Beverages</option><option>Snacks</option><option>Vegetables</option><option>Fruits</option><option>Meat &amp; Fish</option><option>Bakery</option><option>Household</option><option>Personal Care</option></select></div>
+        <div class="fg"><label class="fl">Emoji (icon)</label><input class="fi" id="pm-icon" placeholder="🌾" maxlength="4"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">📋 විකිණීමේ මිල — Market Price (රු.)</label><input class="fi" id="pm-r" type="number" placeholder="0.00" step="0.01"></div>
+        <div class="fg"><label class="fl" style="color:var(--accent)">⭐ අපේ මිල — Retail (රු.)</label><input class="fi" id="pm-c" type="number" placeholder="0.00" step="0.01" style="border-color:rgba(232,255,71,.3)"></div>
+        <div class="fg"><label class="fl" style="color:var(--teal)">⭐ අපේ මිල — Wholesale (රු.)</label><input class="fi" id="pm-w" type="number" placeholder="0.00" step="0.01" style="border-color:rgba(20,184,166,.3)"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Stock ප්‍රමාණය</label><input class="fi" id="pm-s" type="number" placeholder="0"></div>
+        <div class="fg"><label class="fl">අඩු Stock අනතුරු ඇඟවීම</label><input class="fi" id="pm-ls" type="number" placeholder="10"></div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('prod-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveProd()">නිෂ්පාදනය සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFER MODAL -->
+<div class="mo" id="offer-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="om-title">නව විශේෂ දීමනා</div><button class="mc" onclick="cm('offer-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="om-id">
+      <div class="fg"><label class="fl">දීමනාවේ නම</label><input class="fi" id="om-t" placeholder="උදා: සති අන්ත විශේෂ!"></div>
+      <div class="fg"><label class="fl">විස්තරය</label><textarea class="fi" id="om-d" placeholder="විස්තරය..."></textarea></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">වට්ටම %</label><input class="fi" id="om-p" type="number" placeholder="10" min="1" max="90"></div>
+        <div class="fg"><label class="fl">ඉකුත් වන දිනය</label><input class="fi" id="om-u" type="date"></div>
+      </div>
+      <div class="fg"><label class="fl">කාටද?</label><select class="fs" id="om-tg"><option value="all">සියලු ගනුදෙනුකරු</option><option value="retail">Retail පමණි</option><option value="wholesale">Wholesale පමණි</option></select></div>
+      <div class="fg">
+        <label class="fl">නිෂ්පාදන තෝරන්න</label>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:6px">💡 Ctrl/Cmd + click කර multiple products select කරන්න. None = All products.</div>
+        <select class="fs" id="om-prods" multiple style="min-height:120px;padding:4px"></select>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px" id="om-sel-count">0 products selected (all products)</div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('offer-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveOffer()">දීමනාව ප්‍රකාශ කරන්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BULK OFFER MODAL -->
+<div class="mo" id="bulk-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">📊 ප්‍රමාණ දීමනා</div><button class="mc" onclick="cm('bulk-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="bm-id">
+      <div class="fg"><label class="fl">නිෂ්පාදනය</label><select class="fs" id="bm-prod"></select></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">අවම ප්‍රමාණය (ඒකක)</label><input class="fi" id="bm-qty" type="number" placeholder="උදා: 5" min="1"></div>
+        <div class="fg"><label class="fl">ඒකකයට වට්ටම (රු.)</label><input class="fi" id="bm-amt" type="number" placeholder="උදා: 50.00" step="0.01" min="0"></div>
+      </div>
+      <div style="background:rgba(232,255,71,.05);border:1px solid rgba(232,255,71,.15);border-radius:8px;padding:10px;font-size:13px;color:var(--text2);margin-bottom:4px">
+        💡 ඒකකයකට රු. X ක් ඉතිරි කරයි. Bill-to-Bill සහ Cash දෙකටම.</div>
+      <div class="fg"><label class="fl">කාටද?</label><select class="fs" id="bm-tg"><option value="all">සියලු ගනුදෙනුකරු (Retail + Wholesale)</option><option value="retail">Retail පමණි</option><option value="wholesale">Wholesale පමණි</option></select></div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('bulk-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveBulkOffer()">දීමනාව සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- CASH OFFER MODAL -->
+<div class="mo" id="cash-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">💵 Cash ගෙවීම් දීමනා</div><button class="mc" onclick="cm('cash-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="com-id">
+      <div class="fg"><label class="fl">නිෂ්පාදනය</label><select class="fs" id="com-prod"></select></div>
+      <div class="fg"><label class="fl">ඒකකයට Cash වට්ටම (රු.)</label><input class="fi" id="com-amt" type="number" placeholder="උදා: 25.00" step="0.01" min="0"></div>
+      <div style="background:rgba(46,213,115,.05);border:1px solid rgba(46,213,115,.15);border-radius:8px;padding:10px;font-size:13px;color:var(--text2);margin-bottom:8px">
+        💵 Wholesale ගනුදෙනුකරුවෙකු Cash ගෙවූ විට ඒකකයකට රු. X ක් ඉතිරි කරයි.</div>
+      <div class="fg"><label class="fl">ගනුදෙනුකරුට ඉතිරිය පෙන්වනවාද?</label><select class="fs" id="com-show"><option value="1">ඔව් — Cash ගෙවූ විට ඉතිරිය product card-ට පෙන්වන්න</option><option value="0">නෑ — නිශ්ශබ්දව apply කරන්න</option></select></div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('cash-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveCashOffer()">දීමනාව සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOYALTY TIER MODAL -->
+<div class="mo" id="tier-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">⭐ Loyalty Tier</div><button class="mc" onclick="cm('tier-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="tm-id">
+      <div class="fr">
+        <div class="fg"><label class="fl">Tier නාමය</label><input class="fi" id="tm-name" placeholder="උදා: Gold"></div>
+        <div class="fg"><label class="fl">වර්ණය</label><select class="fs" id="tm-style"><option value="lt-bronze">Bronze 🥉</option><option value="lt-silver">Silver 🥈</option><option value="lt-gold">Gold 🥇</option><option value="lt-platinum">Platinum 💎</option></select></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">අවම Points</label><input class="fi" id="tm-min" type="number" placeholder="0"></div>
+        <div class="fg"><label class="fl">Bonus Points % (අමතර points)</label><input class="fi" id="tm-bonus" type="number" placeholder="0"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Bill වට්ටම % (total bill-ට)</label><input class="fi" id="tm-disc" type="number" step="0.5" placeholder="0" min="0" max="30"></div>
+        <div class="fg" style="display:flex;align-items:flex-end"><div style="font-size:13px;color:var(--text3);background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.2);border-radius:6px;padding:8px;line-height:1.5">Tier එකට ළඟා වූ විට bill total-ට සෘජුවම discount ලැබේ</div></div>
+      </div>
+      <div class="fg"><label class="fl">කාටද?</label><select class="fs" id="tm-tg"><option value="all">දෙකටම</option><option value="retail">Retail පමණි</option><option value="wholesale">Wholesale පමණි</option></select></div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('tier-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveTier()">Tier සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE MODAL -->
+<div class="mo" id="zone-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">🚚 බෙදා හැරීමේ කලාපය</div><button class="mc" onclick="cm('zone-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="zm-id">
+      <div class="fg"><label class="fl">කලාපයේ නම</label><input class="fi" id="zm-n" placeholder="උදා: කොළඹ උතුර"></div>
+      <div class="fg"><label class="fl">ප්‍රදේශ (comma separated)</label><input class="fi" id="zm-a" placeholder="උදා: Maradana, Pettah"></div>
+      <div class="fg"><label class="fl">බෙදා හැරීමේ දිනයන් (comma separated)</label><input class="fi" id="zm-d" placeholder="උදා: Monday, Thursday"></div>
+      <div class="fg"><label class="fl">Lead Days (කල් ඉදිරිපත් කිරීම)</label><input class="fi" id="zm-l" type="number" placeholder="2"></div>
+      <div class="fg"><label class="fl" style="color:var(--accent)">🚚 බෙදාහැරීමේ ගාස්තු (රු.)</label><input class="fi" id="zm-fee" type="number" placeholder="0.00" step="0.01" min="0" style="border-color:rgba(232,255,71,.25)"></div>
+      <div style="font-size:13px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px;margin-bottom:4px">💡 0 ලෙස ඇතුළු කළ විට නොමිලේ බෙදාහැරීම ලෙස ගනුදෙනුකරුට දිස්වෙයි.</div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('zone-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveZone()">සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- REMINDER MODAL -->
+<div class="mo" id="rem-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">🔔 මතක් කිරීමක් සැකසීම</div><button class="mc" onclick="cm('rem-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">මාතෘකාව</label><input class="fi" id="rm-t" placeholder="මතක් කිරීමේ නාමය"></div>
+      <div class="fg"><label class="fl">පණිවිඩය</label><textarea class="fi" id="rm-m" placeholder="ගනුදෙනුකරුට යවන පණිවිඩය..."></textarea></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Target</label><select class="fs" id="rm-tg"><option value="retail">Retail (after payday)</option><option value="wholesale">Wholesale (before delivery)</option></select></div>
+        <div class="fg"><label class="fl">Day of month</label><input class="fi" id="rm-d" type="number" placeholder="1" min="1" max="28"></div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('rem-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveRem()">සැකසීම සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="mo" id="odm">
+  <div class="modal" style="max-width:540px">
+    <div class="mh"><div class="mt" id="odm-t">Order Detail</div><button class="mc" onclick="cm('odm')">✕</button></div>
+    <div class="mb" id="odm-b"></div>
+  </div>
+</div>
+
+<!-- COMPLAINT REPLY MODAL -->
+<div class="mo" id="reply-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">Reply to Complaint</div><button class="mc" onclick="cm('reply-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="rc-id">
+      <div class="fg"><label class="fl">Your Reply</label><textarea class="fi" id="rc-txt" style="min-height:90px" placeholder="Reply..."></textarea></div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('reply-modal')">අවලංගු</button><button class="btn btn-primary" onclick="sendReply()">පිළිතුර යවන්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROUTE MODAL -->
+<div class="mo" id="route-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt" id="rtm-title">🗺 Route එකතු කරන්න</div><button class="mc" onclick="cm('route-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="rtm-id">
+      <div class="fg"><label class="fl">Route නාමය</label><input class="fi" id="rtm-name" placeholder="උදා: Route A — Colombo North"></div>
+      <div class="fg"><label class="fl">විස්තරය (ऐच्छिक)</label><input class="fi" id="rtm-desc" placeholder=" විශේෂ සටහන..."></div>
+      <div class="fg">
+        <label class="fl">📅 Delivery දිනයන් (සතිය)</label>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px" id="rtm-days-grid">
+          <label id="day-lbl-Mon" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Monday" onchange="toggleDayLbl(this)" style="display:none"> Mon
+          </label>
+          <label id="day-lbl-Tue" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Tuesday" onchange="toggleDayLbl(this)" style="display:none"> Tue
+          </label>
+          <label id="day-lbl-Wed" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Wednesday" onchange="toggleDayLbl(this)" style="display:none"> Wed
+          </label>
+          <label id="day-lbl-Thu" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Thursday" onchange="toggleDayLbl(this)" style="display:none"> Thu
+          </label>
+          <label id="day-lbl-Fri" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Friday" onchange="toggleDayLbl(this)" style="display:none"> Fri
+          </label>
+          <label id="day-lbl-Sat" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Saturday" onchange="toggleDayLbl(this)" style="display:none"> Sat
+          </label>
+          <label id="day-lbl-Sun" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s;font-size:13px;color:var(--text2)">
+            <input type="checkbox" value="Sunday" onchange="toggleDayLbl(this)" style="display:none"> Sun
+          </label>
+        </div>
+        <div style="font-size:13px;color:var(--text3);margin-top:6px" id="rtm-days-hint">දිනයන් select කර නැත</div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('route-modal')">අවලංගු</button><button class="btn btn-primary" onclick="saveRoute2()">Route සුරකින්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- B2B DEDUCT MODAL -->
+<div class="mo" id="deduct-modal">
+  <div class="modal">
+    <div class="mh"><div class="mt">📋 Bill-to-Bill — Balance Reduce</div><button class="mc" onclick="cm('deduct-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="deduct-cid">
+      <div style="background:rgba(255,165,2,.08);border:1px solid rgba(255,165,2,.2);border-radius:8px;padding:12px;margin-bottom:14px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:4px" id="deduct-name">—</div>
+        <div style="font-size:13px;color:var(--text2)">Current B2B Balance: <span style="color:#f87171;font-weight:700" id="deduct-bal">රු. 0.00</span></div>
+      </div>
+      <div class="fg"><label class="fl">ඉවත් කළ යුතු රු. ප්‍රමාණය (Reduce Amount)</label><input class="fi" id="deduct-amt" type="number" placeholder="0.00" step="0.01" min="0.01"></div>
+      <div class="fg"><label class="fl">සටහන — ඉතිරි settlement හේතුව</label><input class="fi" id="deduct-note" placeholder="e.g. Partial payment received / Invoice #123..."></div>
+      <div style="font-size:13px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px;margin-bottom:4px">💡 ඇතුළු කළ රු. ප්‍රමාණය credit balance-ෙයන් ඉවත් කෙරේ. ගනුදෙනුකරුට notification ලැබේ.</div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('deduct-modal')">අවලංගු</button><button class="btn btn-orange" onclick="applyDeduct()">− Balance Reduce කරන්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- BRANCH B2B DEDUCT MODAL -->
+<div class="mo" id="branch-deduct-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="mh"><div class="mt">📋 Branch B2B ශේෂය අඩු කරන්න</div><button class="mc" onclick="cm('branch-deduct-modal')">✕</button></div>
+    <div class="mb">
+      <input type="hidden" id="branch-deduct-id">
+      <div style="background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.2);border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;margin-bottom:4px;color:var(--text)" id="branch-deduct-name">—</div>
+        <div style="font-size:13px;color:var(--text2)">දැනට ඇති B2B ශේෂය</div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:900;color:var(--red);margin-top:2px" id="branch-deduct-bal">රු. 0.00</div>
+      </div>
+      <div class="fg"><label class="fl" style="font-size:13px">ගෙවූ මුදල (රු.) *</label><input class="fi" id="branch-deduct-amt" type="number" placeholder="0.00" step="0.01" min="0.01" style="font-size:13px"></div>
+      <div class="fg"><label class="fl" style="font-size:13px">සටහන</label><input class="fi" id="branch-deduct-note" placeholder="e.g. Cash ගෙවූ බිල් #..." style="font-size:13px"></div>
+      <div style="font-size:13px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px;margin-bottom:12px">💡 ඇතුළු කළ මුදල Branch B2B ශේෂයෙන් ඉවත් කෙරේ.</div>
+      <div class="fa">
+        <button class="btn btn-ghost" onclick="cm('branch-deduct-modal')">අවලංගු</button>
+        <button class="btn btn-orange" onclick="applyBranchDeduct()" style="font-size:13px">− B2B ශේෂය අඩු කරන්න</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POS SCALE ITEM MODAL -->
+<div class="mo" id="pos-scale-modal">
+  <div class="modal" style="max-width:340px">
+    <div class="mh"><div class="mt">⚖️ Scale නිෂ්පාදනය</div><button class="mc" onclick="cm('pos-scale-modal')">✕</button></div>
+    <div class="mb">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px;color:var(--text)" id="pos-scale-name"></div>
+      <div style="font-size:13px;color:var(--teal);margin-bottom:12px" id="pos-scale-unit-price"></div>
+      <div class="fg">
+        <label class="fl">⚖️ ප්‍රමාණය / kg</label>
+        <input class="fi" id="pos-scale-qty" type="number" placeholder="0.000" step="0.001" min="0.001" oninput="posScaleCalc()" style="font-size:13px;font-weight:700;text-align:center;border-color:var(--teal)">
+      </div>
+      <div style="background:rgba(8,145,178,.08);border:1px solid rgba(8,145,178,.2);border-radius:8px;padding:10px;margin-bottom:14px;text-align:center">
+        <div style="font-size:13px;color:var(--text3);margin-bottom:3px">⭐ අපේ මිල (Billing)</div>
+        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--teal)" id="pos-scale-ape">—</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:2px" id="pos-scale-wik"></div>
+      </div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('pos-scale-modal')">අවලංගු</button><button class="btn btn-primary btn-full" onclick="posScaleConfirm()">✓ Bill-ට එකතු කරන්න</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- POS PRICE CHANGE MODAL -->
+<div class="mo" id="pos-price-modal">
+  <div class="modal" style="max-width:340px">
+    <div class="mh"><div class="mt">💱 මිල වෙනස් කිරීම</div><button class="mc" onclick="cm('pos-price-modal')">✕</button></div>
+    <div class="mb">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px" id="pos-price-item-name"></div>
+      <div class="fg">
+        <label class="fl">⭐ අපේ නව මිල (රු.)</label>
+        <input class="fi" id="pos-price-new" type="number" placeholder="0.00" step="0.01" min="0" style="font-size:13px;font-weight:700">
+      </div>
+      <div style="font-size:13px;color:var(--orange);background:rgba(194,98,10,.07);border:1px solid rgba(194,98,10,.2);border-radius:6px;padding:7px;margin-bottom:4px">⚠ මෙය මෙම bill සඳහා පමණකි — product-ය DB-ය update නොවේ</div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('pos-price-modal')">අවලංගු</button><button class="btn btn-orange btn-full" onclick="posConfirmPriceChange()">✓ Apply</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- POS ADD CUSTOMER MODAL -->
+<div class="mo" id="pos-add-cust-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="mh"><div class="mt">👤 නව ගනුදෙනුකරු ලියාපදිංචි කරන්න</div><button class="mc" onclick="cm('pos-add-cust-modal')">✕</button></div>
+    <div class="mb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:var(--bg2);transition:.15s" id="pac-retail-lbl">
+          <input type="radio" name="pac-type" value="retail" checked onchange="pacTypeChange()" style="accent-color:var(--accent)"> 🛍 Retail
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:var(--bg2);transition:.15s" id="pac-ws-lbl">
+          <input type="radio" name="pac-type" value="wholesale" onchange="pacTypeChange()" style="accent-color:var(--accent)"> 🏭 Wholesale
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fg"><label class="fl">සම්පූර්ණ නම *</label><input class="fi" id="pac-name" placeholder="නම..."></div>
+        <div class="fg"><label class="fl">දුරකථන *</label><input class="fi" id="pac-phone" placeholder="+94 77..."></div>
+        <div class="fg"><label class="fl">ඊමේල්</label><input class="fi" id="pac-email" type="email" placeholder="email (optional)"></div>
+        <div class="fg"><label class="fl">ලිපිනය</label><input class="fi" id="pac-addr" placeholder="ලිපිනය..."></div>
+      </div>
+      <div id="pac-ws-extra" style="display:none;margin-top:4px;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fg"><label class="fl">ව්‍යාපාර නාමය</label><input class="fi" id="pac-biz" placeholder="Business name..."></div>
+        <div class="fg"><label class="fl">🗺 Route</label><select class="fs" id="pac-route"><option value="">— Route —</option></select></div>
+      </div>
+      <div class="fg" style="margin-top:4px"><label class="fl">Login Password (optional)</label><input class="fi" id="pac-pass" type="password" placeholder="min 6 characters"></div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px">💡 ගනුදෙනුකරු Customer App හරහා login විය හැකිය</div>
+      <div class="fa">
+        <button class="btn btn-ghost" onclick="cm('pos-add-cust-modal')">අවලංගු</button>
+        <button class="btn btn-primary" onclick="posSaveNewCust()">👤 ලියාපදිංචි කරන්න</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POS CUSTOMER HISTORY MODAL -->
+<div class="mo" id="pos-cust-hist-modal">
+  <div class="modal" style="max-width:540px;max-height:88vh">
+    <div class="mh"><div class="mt" id="pos-hist-title">📋 Customer History</div><button class="mc" onclick="cm('pos-cust-hist-modal')">✕</button></div>
+    <div class="mb" style="overflow-y:auto;max-height:70vh"><div id="pos-hist-body"></div></div>
+  </div>
+</div>
+
+<!-- POS RECEIPT MODAL -->
+<!-- Hidden print area (only visible when printing) -->
+<div id="admin-print-receipt-area" style="display:none"></div>
+
+<!-- POS RECEIPT MODAL -->
+<div class="mo" id="pos-receipt-modal">
+  <div class="modal" style="max-width:360px;padding:0;overflow:hidden">
+    <div class="mh" style="background:#1a1a1a;border-radius:12px 12px 0 0">
+      <div class="mt" style="color:#fff;display:flex;align-items:center;gap:8px">
+        <span style="background:#27ae60;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px">✓</span>
+        Bill Complete — Preview
+      </div>
+      <button class="mc" onclick="cm('pos-receipt-modal')" style="color:#aaa">✕</button>
+    </div>
+    <div id="pos-receipt-preview-wrap">
+      <div id="pos-receipt-content"></div>
+    </div>
+    <div class="pos-receipt-actions">
+      <button class="btn" style="flex:1;justify-content:center;background:#1a1a1a;color:#fff;font-weight:700;font-size:13px;white-space:nowrap" onclick="posAdminTriggerPrint()">🖨 බිල් print කරන්න</button>
+      <button class="btn btn-ghost" style="flex:1;justify-content:center;white-space:nowrap" onclick="cm('pos-receipt-modal')">✓ හරි</button>
+    </div>
+  </div>
+</div>
+
+<!-- POS HELD BILLS MODAL -->
+<div class="mo" id="pos-held-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="mh"><div class="mt">🔒 Held Bills</div><button class="mc" onclick="cm('pos-held-modal')">✕</button></div>
+    <div class="mb">
+      <div id="pos-held-list" style="min-height:80px"></div>
+      <div class="fa"><button class="btn btn-ghost btn-full" onclick="cm('pos-held-modal')">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- POS SHIFT MODAL -->
+<div class="mo" id="pos-shift-modal">
+  <div class="modal" style="max-width:500px">
+    <div class="mh"><div class="mt">⏰ Shift Report</div><button class="mc" onclick="cm('pos-shift-modal')">✕</button></div>
+    <div class="mb"><div id="pos-shift-content"></div>
+      <div class="fa"><button class="btn btn-ghost" onclick="cm('pos-shift-modal')">Close</button><button class="btn btn-primary" onclick="window.print()">🖨 Print Report</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FLOATING CUSTOMER PANEL (POS page, bottom-right) ══ -->
+<!-- Branch Order floating branch selector (bottom-right, shown on branch-order page) -->
+<button id="bo-branch-float-btn" onclick="boBranchFloatToggle()">
+  🏪 <span id="bo-branch-float-label">Branch තෝරන්න</span>
+  <span style="font-size:13px;opacity:.8" id="bo-branch-float-arrow">▲</span>
+</button>
+<div id="bo-branch-float-panel">
+  <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg1);border-radius:16px 16px 0 0;position:sticky;top:0;z-index:2">
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--teal)">🏪 Branch Supermarket</div>
+    <button onclick="boBranchFloatToggle()" style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer">✕</button>
+  </div>
+  <div style="padding:12px 16px 4px">
+    <div style="font-size:13px;color:var(--text3);margin-bottom:8px">ඇණවුම කරන branch supermarket තෝරන්න:</div>
+    <div id="bo-branch-list-float"></div>
+  </div>
+  <!-- B2B balance info — shown when B2B payment selected -->
+  <div id="bo-b2b-panel" style="display:none;margin:0 12px 12px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.3);border-radius:10px;padding:12px 14px">
+    <div style="font-size:13px;color:var(--purple);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:8px">📋 Branch B2B ගෙවීම් විස්තර — <span id="bo-b2b-branch-name" style="color:var(--teal)"></span></div>
+
+    <!-- Hand savings highlight -->
+    <div id="bo-b2b-hand-row" style="display:flex;justify-content:space-between;align-items:center;background:rgba(21,128,61,.12);border:1.5px solid rgba(21,128,61,.4);border-radius:6px;padding:5px 8px;margin-bottom:8px">
+      <span style="color:var(--green);font-weight:700;font-size:13px">🟢 අත ඉතිරි මුදල</span>
+      <span id="bo-b2b-hand-save" style="color:var(--green);font-weight:800;font-family:'Syne',sans-serif;font-size:14px">රු. 0.00</span>
+    </div>
+
+    <!-- B2B added to account confirmation row -->
+    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(29,78,216,.08);border:1px solid rgba(29,78,216,.2);border-radius:6px;padding:5px 8px;margin-bottom:8px">
+      <span style="color:#1d4ed8;font-weight:700;font-size:13px">📄 ගිණුමට එකතු කළා</span>
+      <span style="color:#1d4ed8;font-weight:700;font-size:13px">✓</span>
+    </div>
+
+    <!-- Balance breakdown -->
+    <div style="display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:13px;margin-bottom:6px">
+      <span style="color:var(--text2)">දැනට ඇති B2B ශේෂය</span>
+      <span id="bo-b2b-existing" style="font-weight:800;color:var(--red);font-family:'Syne',sans-serif;text-align:right">රු. 0.00</span>
+      <span style="color:var(--text2)">මෙම බිල්පත</span>
+      <span id="bo-b2b-this" style="font-weight:700;color:var(--orange);font-family:'Syne',sans-serif;text-align:right">රු. 0.00</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(124,58,237,.25);padding-top:7px;margin-top:3px">
+      <span style="font-size:13px;font-weight:700">ගෙවිය යුතු සම්පූර්ණ</span>
+      <span id="bo-b2b-total" style="color:var(--red);font-family:'Syne',sans-serif;font-size:16px;font-weight:900">රු. 0.00</span>
+    </div>
+
+    <!-- Partial payment -->
+    <div id="bo-b2b-partial-row" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(124,58,237,.15)">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:5px">🔄 දැන් කොටසක් ගෙවීමට (Partial) — optional</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input class="pos-cash-inp" id="bo-b2b-partial" type="number" placeholder="ගෙවන මුදල රු...." min="0" oninput="boUpdateB2BPartial()" style="flex:1;font-size:13px">
+        <button onclick="document.getElementById('bo-b2b-partial').value='';boUpdateB2BPartial()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text3);cursor:pointer;font-size:13px">Clear</button>
+      </div>
+      <div id="bo-b2b-remaining" style="margin-top:5px;font-size:13px;color:var(--teal)"></div>
+    </div>
+  </div>
+</div>
+
+<button id="pos-cust-float-btn" onclick="posToggleCustPanel()">
+  👤 <span id="pos-cust-float-label">Walk-in Retail</span>
+  <span class="pos-cust-chip" id="pos-cust-float-chip" style="display:none"></span>
+  <span style="font-size:13px;opacity:.7" id="pos-cust-float-arrow">▲</span>
+</button>
+
+<div id="pos-cust-float-panel">
+  <div class="pos-cfp-head">
+    <div class="pos-cfp-title">👤 ගනුදෙනුකරු</div>
+    <div style="display:flex;gap:5px;align-items:center">
+      <button onclick="posOpenAddCust()" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:13px;cursor:pointer;font-family:'DM Mono',monospace;font-weight:600">＋ නව ගනුදෙනුකරු</button>
+      <button class="pos-cfp-close" onclick="posToggleCustPanel()">✕</button>
+    </div>
+  </div>
+  <div class="pos-cfp-body">
+    <!-- Retail | Wholesale tabs -->
+    <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px">
+      <div id="pos-tab-retail" class="pos-cust-tab active" onclick="posSwitchTab('retail')">🛍 Retail</div>
+      <div id="pos-tab-wholesale" class="pos-cust-tab" onclick="posSwitchTab('wholesale')" style="border-left:1px solid var(--border)">🏭 Wholesale</div>
+    </div>
+    <!-- Retail panel -->
+    <div id="pos-panel-retail">
+      <div style="display:flex;gap:6px;margin-bottom:7px">
+        <div id="pos-rt-walkin" class="pos-sub-tab active" onclick="posSetSubTab('retail','walkin')">Walk-in Retail</div>
+        <div id="pos-rt-member" class="pos-sub-tab" onclick="posSetSubTab('retail','member')">👤 Member</div>
+      </div>
+      <div id="pos-rt-member-panel" style="display:none">
+        <input class="pos-cust-sel" id="pos-retail-q" placeholder="👤 නම හෝ දුරකථන (Retail)..." oninput="posLookupCust(this.value,'retail')" autocomplete="off" style="margin-top:0">
+        <div id="pos-retail-results" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;max-height:150px;overflow-y:auto;margin-top:3px;display:none"></div>
+        <div id="pos-retail-badge" style="display:none;background:var(--accent-dim);border:1px solid rgba(26,122,80,.25);border-radius:7px;padding:7px 10px;margin-top:3px;font-size:13px"></div>
+      </div>
+    </div>
+    <!-- Wholesale panel -->
+    <div id="pos-panel-wholesale" style="display:none">
+      <div style="display:flex;gap:6px;margin-bottom:7px">
+        <div id="pos-ws-walkin" class="pos-sub-tab active" onclick="posSetSubTab('wholesale','walkin')">Walk-in Wholesale</div>
+        <div id="pos-ws-member" class="pos-sub-tab" onclick="posSetSubTab('wholesale','member')">👤 Customer</div>
+      </div>
+      <div id="pos-ws-member-panel" style="display:none">
+        <input class="pos-cust-sel" id="pos-ws-q" placeholder="👤 නම හෝ දුරකථන (Wholesale)..." oninput="posLookupCust(this.value,'wholesale')" autocomplete="off" style="margin-top:0">
+        <div id="pos-ws-results" style="background:var(--bg2);border:1px solid var(--border);border-radius:7px;max-height:150px;overflow-y:auto;margin-top:3px;display:none"></div>
+        <div id="pos-ws-badge" style="display:none;background:var(--accent-dim);border:1px solid rgba(26,122,80,.25);border-radius:7px;padding:7px 10px;margin-top:3px;font-size:13px"></div>
+      </div>
+      <div id="pos-b2b-section" style="display:none;margin-top:7px">
+        <div style="font-size:13px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">ගෙවීම් ක්‍රමය</div>
+        <div style="display:flex;gap:6px">
+          <div id="pos-b2b-cash-btn" class="pos-sub-tab active" onclick="posSetWsPayMethod('cash')" style="flex:1;text-align:center">💵 Cash</div>
+          <div id="pos-b2b-b2b-btn" class="pos-sub-tab" onclick="posSetWsPayMethod('bill_to_bill')" style="flex:1;text-align:center">📄 Bill-to-Bill</div>
+        </div>
+        <div id="pos-b2b-balance-info" style="display:none;margin-top:5px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);border-radius:7px;padding:7px 10px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--text2)">📋 Credit Balance</span>
+            <span id="pos-b2b-bal-amt" style="font-family:'Syne',sans-serif;font-weight:800;color:var(--red)">රු. 0.00</span>
+          </div>
+          <div style="font-size:13px;color:var(--text3);margin-top:2px">මෙම ඇණවුම B2B balance-ට add වේ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tc" id="tc"></div>
+
+  <script src="mart-admin.js"></script>
+</body>
+</html>
